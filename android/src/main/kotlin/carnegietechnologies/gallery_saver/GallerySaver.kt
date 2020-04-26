@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import androidx.core.app.ActivityCompat
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -26,6 +27,18 @@ class GallerySaver internal constructor(private val context: Context) :
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
 
     internal var activity: Activity? = null
+
+    /**
+     * Checks if the file specified by the [path] is an image.
+     *
+     * The function returns true/false depending on whether the bounds can be read.
+     */
+    internal fun isImage(path: String): Boolean {
+        val options = BitmapFactory.Options()
+        options.inJustDecodeBounds = true
+        BitmapFactory.decodeFile(path, options)
+        return (options.outWidth != -1 && options.outHeight != -1)
+    }
 
     /**
      * Saves image or video to device
