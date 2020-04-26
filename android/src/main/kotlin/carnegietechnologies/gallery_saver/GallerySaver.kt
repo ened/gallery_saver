@@ -2,6 +2,7 @@ package carnegietechnologies.gallery_saver
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import io.flutter.plugin.common.MethodCall
@@ -13,7 +14,7 @@ enum class MediaType { image, video }
 /**
  * Class holding implementation of saving images and videos
  */
-class GallerySaver internal constructor(private val activity: Activity) :
+class GallerySaver internal constructor(private val context: Context) :
     PluginRegistry.RequestPermissionsResultListener {
 
     private var pendingResult: MethodChannel.Result? = null
@@ -23,6 +24,8 @@ class GallerySaver internal constructor(private val activity: Activity) :
 
     private val job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
+
+    internal var activity: Activity? = null
 
     /**
      * Saves image or video to device
@@ -43,20 +46,21 @@ class GallerySaver internal constructor(private val activity: Activity) :
 
         if (isWritePermissionGranted()) {
             saveMediaFile()
-        } else {
+        } else if (activity != null){
             ActivityCompat.requestPermissions(
-                activity,
+                activity!!,
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 REQUEST_EXTERNAL_IMAGE_STORAGE_PERMISSION
             )
-
+        } else {
+            result.error("missing-permission", "permissions can not be requested", null)
         }
     }
 
     private fun isWritePermissionGranted(): Boolean {
         return PackageManager.PERMISSION_GRANTED ==
                 ActivityCompat.checkSelfPermission(
-                    activity, Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    context, Manifest.permission.WRITE_EXTERNAL_STORAGE
                 )
     }
 
@@ -64,9 +68,9 @@ class GallerySaver internal constructor(private val activity: Activity) :
         uiScope.launch {
             val success = async(Dispatchers.IO) {
                 if (mediaType == MediaType.video) {
-                    FileUtils.insertVideo(activity.contentResolver, filePath, albumName)
+                    FileUtils.insertVideo(context.contentResolver, filePath, albumName)
                 } else {
-                    FileUtils.insertImage(activity.contentResolver, filePath, albumName)
+                    FileUtils.insertImage(context.contentResolver, filePath, albumName)
                 }
             }
             success.await()
@@ -88,9 +92,9 @@ class GallerySaver internal constructor(private val activity: Activity) :
         if (requestCode == REQUEST_EXTERNAL_IMAGE_STORAGE_PERMISSION) {
             if (permissionGranted) {
                 if (mediaType == MediaType.video) {
-                    FileUtils.insertVideo(activity.contentResolver, filePath, albumName)
+                    FileUtils.insertVideo(context.contentResolver, filePath, albumName)
                 } else {
-                    FileUtils.insertImage(activity.contentResolver, filePath, albumName)
+                    FileUtils.insertImage(context.contentResolver, filePath, albumName)
                 }
             }
         } else {

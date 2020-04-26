@@ -1,24 +1,33 @@
 package carnegietechnologies.gallery_saver
 
+import android.app.Activity
+import android.content.Context
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
-class GallerySaverPlugin private constructor(
-        private val gallerySaver: GallerySaver) : MethodCallHandler {
+class GallerySaverPlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
+
+    private lateinit var gallerySaver: GallerySaver
+    private var activityBinding: ActivityPluginBinding? = null
 
     companion object {
         @JvmStatic
         fun registerWith(registrar: Registrar) {
-            val channel = MethodChannel(registrar.messenger(),
-                    "gallery_saver")
-            val gallerySaver = GallerySaver(registrar.activity())
-            registrar.addRequestPermissionsResultListener(gallerySaver)
-            val instance = GallerySaverPlugin(
-                    gallerySaver)
-            channel.setMethodCallHandler(instance)
+            val instance = GallerySaverPlugin()
+            instance.startListening(registrar.context(), registrar.messenger())
+
+            registrar.addRequestPermissionsResultListener(instance.gallerySaver)
+
+            if (registrar.activeContext() is Activity) {
+                instance.gallerySaver.activity = registrar.activity()
+            }
         }
     }
 
@@ -28,5 +37,41 @@ class GallerySaverPlugin private constructor(
             "saveVideo" -> gallerySaver.checkPermissionAndSaveFile(call, result, MediaType.video)
             else -> result.notImplemented()
         }
+    }
+
+    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        startListening(binding.applicationContext, binding.binaryMessenger)
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        onAttachedToActivity(binding)
+    }
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        activityBinding = binding
+
+        binding.addRequestPermissionsResultListener(gallerySaver)
+        gallerySaver.activity = binding.activity
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+        onDetachedFromActivity()
+    }
+
+    override fun onDetachedFromActivity() {
+        gallerySaver.activity = null
+
+        activityBinding?.removeRequestPermissionsResultListener(gallerySaver)
+        activityBinding = null
+    }
+
+    private fun startListening(context: Context, messenger: BinaryMessenger) {
+        gallerySaver = GallerySaver(context)
+
+        val channel = MethodChannel(messenger, "gallery_saver")
+        channel.setMethodCallHandler(this)
     }
 }
