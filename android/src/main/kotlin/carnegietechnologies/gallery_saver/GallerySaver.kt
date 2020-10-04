@@ -11,7 +11,6 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 import kotlinx.coroutines.*
 
-enum class MediaType { Image, Video }
 
 /**
  * Class holding implementation of saving images and videos
