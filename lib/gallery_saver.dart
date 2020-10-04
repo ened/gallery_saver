@@ -3,9 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:gallery_saver/files.dart';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart';
 
 class GallerySaver {
   static const String channelName = 'gallery_saver';
@@ -15,6 +12,7 @@ class GallerySaver {
   static const String pleaseProvidePath = 'Please provide valid file path.';
   static const String fileIsNotVideo = 'File on path is not a video.';
   static const String fileIsNotImage = 'File on path is not an image.';
+  static const String fileIsNotLocal = 'File on path locally available.';
   static const MethodChannel _channel = const MethodChannel(channelName);
 
   ///saves video from provided temp path and optional album name in gallery
@@ -27,8 +25,7 @@ class GallerySaver {
       throw ArgumentError(fileIsNotVideo);
     }
     if (!isLocalFilePath(path)) {
-      tempFile = await _downloadFile(path);
-      path = tempFile.path;
+      throw ArgumentError(fileIsNotLocal);
     }
     bool result = await _channel.invokeMethod(
       methodSaveVideo,
@@ -50,8 +47,7 @@ class GallerySaver {
       throw ArgumentError(fileIsNotImage);
     }
     if (!isLocalFilePath(path)) {
-      tempFile = await _downloadFile(path);
-      path = tempFile.path;
+      throw ArgumentError(fileIsNotLocal);
     }
 
     bool result = await _channel.invokeMethod(
@@ -67,18 +63,5 @@ class GallerySaver {
 
   static Future<bool> _checkIfFileIsImage(String path) async {
     return _channel.invokeMethod<bool>('image.check', path);
-  }
-
-  static Future<File> _downloadFile(String url) async {
-    print(url);
-    http.Client _client = new http.Client();
-    var req = await _client.get(Uri.parse(url));
-    var bytes = req.bodyBytes;
-    String dir = (await getTemporaryDirectory()).path;
-    File file = new File('$dir/${basename(url)}');
-    await file.writeAsBytes(bytes);
-    print('File size:${await file.length()}');
-    print(file.path);
-    return file;
   }
 }
