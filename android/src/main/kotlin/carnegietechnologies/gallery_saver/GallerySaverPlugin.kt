@@ -33,8 +33,8 @@ class GallerySaverPlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
-            "saveImage" -> gallerySaver.checkPermissionAndSaveFile(call, result, MediaType.image)
-            "saveVideo" -> gallerySaver.checkPermissionAndSaveFile(call, result, MediaType.video)
+            "saveImage" -> gallerySaver.checkPermissionAndSaveFile(call, result, MediaType.Image)
+            "saveVideo" -> gallerySaver.checkPermissionAndSaveFile(call, result, MediaType.Video)
             "image.check" -> {
                 val path = call.arguments<String>()
                 val isImage = gallerySaver.isImage(path)

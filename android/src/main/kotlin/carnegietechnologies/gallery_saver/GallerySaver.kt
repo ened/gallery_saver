@@ -11,7 +11,8 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 import kotlinx.coroutines.*
 
-enum class MediaType { image, video }
+enum class MediaType { Image, Video }
+
 /**
  * Class holding implementation of saving images and videos
  */
@@ -80,7 +81,7 @@ class GallerySaver internal constructor(private val context: Context) :
     private fun saveMediaFile() {
         uiScope.launch {
             val success = async(Dispatchers.IO) {
-                if (mediaType == MediaType.video) {
+                if (mediaType == MediaType.Video) {
                     FileUtils.insertVideo(context.contentResolver, filePath, albumName)
                 } else {
                     FileUtils.insertImage(context.contentResolver, filePath, albumName)
@@ -104,7 +105,7 @@ class GallerySaver internal constructor(private val context: Context) :
 
         if (requestCode == REQUEST_EXTERNAL_IMAGE_STORAGE_PERMISSION) {
             if (permissionGranted) {
-                if (mediaType == MediaType.video) {
+                if (mediaType == MediaType.Video) {
                     FileUtils.insertVideo(context.contentResolver, filePath, albumName)
                 } else {
                     FileUtils.insertImage(context.contentResolver, filePath, albumName)

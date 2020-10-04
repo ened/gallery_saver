@@ -51,7 +51,7 @@ internal object FileUtils {
         if (rotatedBytes != null) {
             source = rotatedBytes
         }
-        val albumDir = File(getAlbumFolderPath(folderName, MediaType.image))
+        val albumDir = File(getAlbumFolderPath(folderName, MediaType.Image))
         val imageFilePath = File(albumDir, file.name).absolutePath
 
         val values = ContentValues()
@@ -241,7 +241,7 @@ internal object FileUtils {
         val extension = MimeTypeMap.getFileExtensionFromUrl(inputFile.toString())
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
 
-        val albumDir = File(getAlbumFolderPath(folderName, MediaType.video))
+        val albumDir = File(getAlbumFolderPath(folderName, MediaType.Video))
         val videoFilePath = File(albumDir, inputFile.name).absolutePath
 
         val values = ContentValues()
@@ -281,7 +281,7 @@ internal object FileUtils {
     private fun getAlbumFolderPath(folderName: String?, mediaType: MediaType): String {
         var albumFolderPath: String = Environment.getExternalStorageDirectory().path
         albumFolderPath = if (TextUtils.isEmpty(folderName)) {
-            val baseFolderName = if (mediaType == MediaType.image)
+            val baseFolderName = if (mediaType == MediaType.Image)
                 Environment.DIRECTORY_PICTURES else
                 Environment.DIRECTORY_MOVIES
             createDirIfNotExist(
