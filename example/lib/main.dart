@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
@@ -59,8 +57,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _takePhoto() async {
-    ImagePicker.pickImage(source: ImageSource.camera)
-        .then((File recordedImage) {
+    ImagePicker()
+        .getImage(source: ImageSource.camera)
+        .then((PickedFile recordedImage) {
       if (recordedImage != null && recordedImage.path != null) {
         setState(() {
           firstButtonText = 'saving in progress...';
@@ -76,8 +75,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _recordVideo() async {
-    ImagePicker.pickVideo(source: ImageSource.camera)
-        .then((File recordedVideo) {
+    ImagePicker()
+        .getVideo(source: ImageSource.camera)
+        .then((PickedFile recordedVideo) {
       if (recordedVideo != null && recordedVideo.path != null) {
         setState(() {
           secondButtonText = 'saving in progress...';
