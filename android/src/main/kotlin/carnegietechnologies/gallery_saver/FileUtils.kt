@@ -162,16 +162,9 @@ internal object FileUtils {
         values.put(MediaStore.Images.Thumbnails.HEIGHT, thumb.height)
         values.put(MediaStore.Images.Thumbnails.WIDTH, thumb.width)
 
-        val thumbUri = contentResolver.insert(
+        contentResolver.insert(
             MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, values
         )
-
-        var outputStream: OutputStream? = null
-        outputStream.use {
-            if (thumbUri != null) {
-                outputStream = contentResolver.openOutputStream(thumbUri)
-            }
-        }
     }
 
     /**
